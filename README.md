@@ -1,53 +1,146 @@
 ---
 page_type: sample
 languages:
-- csharp
+- java
 products:
-- dotnet
-description: "Add 150 character max description"
-urlFragment: "update-this-to-unique-url-stub"
+- azure
+- azure-functions
+- azure-event-hubs
+- azure-cosmos-db
+description: "Shows how to use Azure Functions with Java to analyze Event Hub events and store results in a Cosmos DB."
+urlFragment: "sample"
 ---
 
-# Official Microsoft Sample
+# Azure Functions in Java with an Event Hub trigger and Cosmos DB output binding
 
-<!-- 
-Guidelines on README format: https://review.docs.microsoft.com/help/onboard/admin/samples/concepts/readme-template?branch=master
+Shows how to use Azure Functions with Java to handle Event Hub events and store analysis results in a Cosmos DB. 
 
-Guidance on onboarding samples to docs.microsoft.com/samples: https://review.docs.microsoft.com/help/onboard/admin/samples/process/onboarding?branch=master
-
-Taxonomies for products and languages: https://review.docs.microsoft.com/new-hope/information-architecture/metadata/taxonomies?branch=master
--->
-
-Give a short description for your sample here. What does it do and why is it important?
-
-## Contents
-
-Outline the file contents of the repository. It helps users navigate the codebase, build configuration and any related assets.
-
-| File/folder       | Description                                |
-|-------------------|--------------------------------------------|
-| `src`             | Sample source code.                        |
-| `.gitignore`      | Define what to ignore at commit time.      |
-| `CHANGELOG.md`    | List of changes to the sample.             |
-| `CONTRIBUTING.md` | Guidelines for contributing to the sample. |
-| `README.md`       | This README file.                          |
-| `LICENSE`         | The license for the sample.                |
+This sample accompanies [Tutorial: Create an Azure function in Java with an Event Hub trigger and Cosmos DB output binding](https://docs.microsoft.com/azure/azure-functions/functions-eventhub-cosmosdb).
 
 ## Prerequisites
 
-Outline the required components and tools that a user might need to have on their machine in order to run the sample. This can be anything from frameworks, SDKs, OS versions or IDE releases.
+* [Azure CLI](/cli/azure/install-azure-cli) if you prefer not to use Cloud Shell
+* [Java Developer Kit](https://aka.ms/azure-jdks), version 8
+* [Maven](https://maven.apache.org)
+* [Azure Functions Core Tools](https://www.npmjs.com/package/azure-functions-core-tools)
 
 ## Setup
 
-Explain how to prepare the sample once the user clones or downloads the repository. The section should outline every step necessary to install dependencies and set up any settings (for example, API keys and output folders).
+Navigate to the folder containing the repo and run the following commands. Replace the `<value>` placeholders with appropriate resources names/location.
 
-## Runnning the sample
+```
+RESOURCE_GROUP=<value>
+EVENT_HUB_NAMESPACE=<value>
+EVENT_HUB_NAME=<value>
+EVENT_HUB_AUTHORIZATION_RULE=<value>
+COSMOS_DB_ACCOUNT=<value>
+STORAGE_ACCOUNT=<value>
+FUNCTION_APP=<value>
+LOCATION=<value>
 
-Outline step-by-step instructions to execute the sample and see its output. Include steps for executing the sample from the IDE, starting specific services in the Azure portal or anything related to the overall launch of the code.
+az group create \
+    --name $RESOURCE_GROUP \
+    --location $LOCATION
+
+az eventhubs namespace create \
+    --resource-group $RESOURCE_GROUP \
+    --name $EVENT_HUB_NAMESPACE
+az eventhubs eventhub create \
+    --resource-group $RESOURCE_GROUP \
+    --name $EVENT_HUB_NAME \
+    --namespace-name $EVENT_HUB_NAMESPACE \
+    --message-retention 1
+az eventhubs eventhub authorization-rule create \
+    --resource-group $RESOURCE_GROUP \
+    --name $EVENT_HUB_AUTHORIZATION_RULE \
+    --eventhub-name $EVENT_HUB_NAME \
+    --namespace-name $EVENT_HUB_NAMESPACE \
+    --rights Listen Send
+
+az cosmosdb create \
+    --resource-group $RESOURCE_GROUP \
+    --name $COSMOS_DB_ACCOUNT
+az cosmosdb database create \
+    --resource-group-name $RESOURCE_GROUP \
+    --name $COSMOS_DB_ACCOUNT \
+    --db-name TelemetryDb
+az cosmosdb collection create \
+    --resource-group-name $RESOURCE_GROUP \
+    --name $COSMOS_DB_ACCOUNT \
+    --collection-name TelemetryInfo \
+    --db-name TelemetryDb \
+    --partition-key-path '/temperatureStatus'
+
+az storage account create \
+    --resource-group $RESOURCE_GROUP \
+    --name $STORAGE_ACCOUNT \
+    --sku Standard_LRS
+az functionapp create \
+    --resource-group $RESOURCE_GROUP \
+    --name $FUNCTION_APP \
+    --storage-account $STORAGE_ACCOUNT \
+    --consumption-plan-location $LOCATION \
+    --runtime java
+
+AZURE_WEB_JOBS_STORAGE=$( \
+    az storage account show-connection-string \
+        --name $STORAGE_ACCOUNT \
+        --query connectionString \
+        --output tsv)
+echo $AZURE_WEB_JOBS_STORAGE
+EVENT_HUB_CONNECTION_STRING=$( \
+    az eventhubs eventhub authorization-rule keys list \
+        --resource-group $RESOURCE_GROUP \
+        --name $EVENT_HUB_AUTHORIZATION_RULE \
+        --eventhub-name $EVENT_HUB_NAME \
+        --namespace-name $EVENT_HUB_NAMESPACE \
+        --query primaryConnectionString \
+        --output tsv)
+echo $EVENT_HUB_CONNECTION_STRING
+COSMOS_DB_CONNECTION_STRING=$( \
+    az cosmosdb keys list \
+        --resource-group $RESOURCE_GROUP \
+        --name $COSMOS_DB_ACCOUNT \
+        --type connection-strings \
+        --query connectionStrings[0].connectionString \
+        --output tsv)
+echo $COSMOS_DB_CONNECTION_STRING
+
+az functionapp config appsettings set \
+    --resource-group $RESOURCE_GROUP \
+    --name $FUNCTION_APP \
+    --settings \
+        AzureWebJobsStorage=$AZURE_WEB_JOBS_STORAGE \
+        EventHubConnectionString=$EVENT_HUB_CONNECTION_STRING \
+        CosmosDBConnectionString=$COSMOS_DB_CONNECTION_STRING
+
+func azure functionapp fetch-app-settings $FUNCTION_APP
+```
+
+## Running the sample
+
+Run the sample locally:
+
+```
+mvn clean package
+mvn azure-functions:run
+```
+
+Deploy to Azure:
+
+```bash
+mvn azure-functions:deploy
+```
+
+Clean up Azure resources when you are finished:
+
+```
+az group delete --name $RESOURCE_GROUP
+```
 
 ## Key concepts
 
-Provide users with more context on the tools and services used in the sample. Explain some of the code that is being used and how services interact with each other.
+For details, see [Tutorial: Create an Azure function in Java with an Event Hub trigger and Cosmos DB output binding](https://docs.microsoft.com/azure/azure-functions/functions-eventhub-cosmosdb).
 
 ## Contributing
 
