@@ -25,7 +25,7 @@ public class Function {
         final ExecutionContext context) {
 
         context.getLogger().info("Java Timer trigger function executed at: "
-            + LocalDateTime.now());
+            + java.time.LocalDateTime.now());
         double temperature = Math.random() * 100;
         double pressure = Math.random() * 50;
         return new TelemetryItem(temperature, pressure);
