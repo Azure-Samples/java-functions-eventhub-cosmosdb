@@ -26,7 +26,7 @@ This sample accompanies [Tutorial: Create an Azure function in Java with an Even
 
 ## Setup
 
-Navigate to the folder containing the repo and run the following commands. Replace the `<value>` placeholders with appropriate resources names/location.
+Navigate to the folder containing the repo and run the following commands. Replace the `<value>` placeholders with appropriate resource names and location.
 
 ```
 RESOURCE_GROUP=<value>
