@@ -19,7 +19,7 @@ This sample accompanies [Tutorial: Create an Azure function in Java with an Even
 
 ## Prerequisites
 
-* [Azure CLI](/cli/azure/install-azure-cli) if you prefer not to use Cloud Shell
+* [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli)
 * [Java Developer Kit](https://aka.ms/azure-jdks), version 8
 * [Maven](https://maven.apache.org)
 * [Azure Functions Core Tools](https://www.npmjs.com/package/azure-functions-core-tools)
