@@ -114,6 +114,17 @@ az functionapp config appsettings set \
         EventHubConnectionString=$EVENT_HUB_CONNECTION_STRING \
         CosmosDBConnectionString=$COSMOS_DB_CONNECTION_STRING
 
+mvn archetype:generate --batch-mode \
+    -DarchetypeGroupId=com.microsoft.azure \
+    -DarchetypeArtifactId=azure-functions-archetype \
+    -DappName=$FUNCTION_APP \
+    -DresourceGroup=$RESOURCE_GROUP \
+    -DgroupId=com.example \
+    -DartifactId=telemetry-functions
+
+cd telemetry-functions
+rm -r src/test
+
 func azure functionapp fetch-app-settings $FUNCTION_APP
 ```
 
