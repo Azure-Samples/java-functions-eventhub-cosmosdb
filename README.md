@@ -13,9 +13,12 @@ urlFragment: "sample"
 
 # Azure Functions in Java with an Event Hub trigger and Cosmos DB output binding
 
-Shows how to use Azure Functions with Java to handle Event Hub events and store analysis results in a Cosmos DB. 
+Shows how to use Azure Functions with Java to handle Event Hub events and store analysis results in a Cosmos DB database.
 
 This sample accompanies [Tutorial: Create an Azure function in Java with an Event Hub trigger and Cosmos DB output binding](https://docs.microsoft.com/azure/azure-functions/functions-event-hub-cosmos-db).
+
+The commands below use a Bash environment. Equivalent commands for the Windows Cmd environment are provided in the tutorial.
+
 ## Prerequisites
 
 * [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli)
@@ -59,15 +62,15 @@ az eventhubs eventhub authorization-rule create \
 az cosmosdb create \
     --resource-group $RESOURCE_GROUP \
     --name $COSMOS_DB_ACCOUNT
-az cosmosdb database create \
-    --resource-group-name $RESOURCE_GROUP \
-    --name $COSMOS_DB_ACCOUNT \
-    --db-name TelemetryDb
-az cosmosdb collection create \
-    --resource-group-name $RESOURCE_GROUP \
-    --name $COSMOS_DB_ACCOUNT \
-    --collection-name TelemetryInfo \
-    --db-name TelemetryDb \
+az cosmosdb sql database create \
+    --resource-group $RESOURCE_GROUP \
+    --account-name $COSMOS_DB_ACCOUNT \
+    --name TelemetryDb
+az cosmosdb sql container create \
+    --resource-group $RESOURCE_GROUP \
+    --account-name $COSMOS_DB_ACCOUNT \
+    --database-name TelemetryDb \
+    --name TelemetryInfo \
     --partition-key-path '/temperatureStatus'
 
 az storage account create \
@@ -79,7 +82,8 @@ az functionapp create \
     --name $FUNCTION_APP \
     --storage-account $STORAGE_ACCOUNT \
     --consumption-plan-location $LOCATION \
-    --runtime java
+    --runtime java \
+    --functions-version 2
 
 AZURE_WEB_JOBS_STORAGE=$( \
     az storage account show-connection-string \
