@@ -15,7 +15,7 @@ urlFragment: "sample"
 
 Shows how to use Azure Functions with Java to handle Event Hub events and store analysis results in a Cosmos DB database.
 
-This sample accompanies [Tutorial: Create an Azure function in Java with an Event Hub trigger and Cosmos DB output binding](https://docs.microsoft.com/azure/azure-functions/functions-event-hub-cosmos-db).
+This sample accompanies [Tutorial: Create an Azure Function in Java with an Event Hub trigger and Cosmos DB output binding](https://docs.microsoft.com/azure/azure-functions/functions-event-hub-cosmos-db).
 
 The commands below use a Bash environment. Equivalent commands for the Windows Cmd environment are provided in the tutorial.
 
